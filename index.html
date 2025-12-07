@@ -1,508 +1,434 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Bluewatch — Demo UI</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --navy:#124089;
-    --navy-2:#0f3b7a;
-    --bg:#f3f6fa; /* page background behind the rounded phone */
-    --card:#ffffff;
-    --muted:#6d7780;
-    --accent:#1fb6ff;
-    --accent-2:#06b7e7;
-    --danger:#d93b34;
-    --soft-shadow: 0 10px 24px rgba(13,38,69,0.08);
-    --glass: rgba(255,255,255,0.75);
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-family:Inter,system-ui,Segoe UI,Roboto,Arial;
-    background: linear-gradient(180deg,#e7eef7 0%, #f3f6fa 55%, #e9eef6 100%);
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    padding:24px;
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BlueWatch — Standalone HTML (no external deps)</title>
 
-  /* phone-like frame */
-  .device {
-    width:390px;
-    max-width:92vw;
-    height:844px;
-    background: linear-gradient(180deg, var(--navy), var(--navy-2));
-    border-radius:24px;
-    padding:0;
-    box-shadow: 0 30px 80px rgba(6,22,46,0.35);
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-  }
+  <!--
+    Single-file pure-HTML/CSS/vanilla-JS version.
+    - No external scripts, no modules, no CDN.
+    - Works when opened directly in VSCode (Live Server) or with file://.
+    - Lightweight interactive UI: dashboard, report form, feed, contacts.
+  -->
 
-  /* header */
-  header.appbar{
-    height:84px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
-    padding:16px 18px;
-    display:flex;
-    align-items:center;
-    gap:12px;
-  }
-  .brand{
-    display:flex; align-items:center; gap:12px; color:#fff;
-  }
-  .logo-badge{
-    width:46px; height:46px; border-radius:10px;
-    background: linear-gradient(135deg,#18c3ff,#0a7ad9);
-    display:flex; align-items:center; justify-content:center; font-weight:800; color:#04202b;
-    box-shadow: 0 6px 20px rgba(10,130,210,0.18);
-    flex-shrink:0;
-  }
-  .brand h1{ margin:0; font-size:18px; letter-spacing:0.4px; font-weight:800; color:#fff; }
-  .brand p{ margin:0; font-size:11px; color:#bfeeff; opacity:0.95; margin-top:2px; }
+  <style>
+    :root{
+      --bg:#f3f6fb; --card:#ffffff; --muted:#6b7280; --brand:#0f4fa3;
+      --accent:#06b6d4; --danger:#ef4444; --success:#10b981;
+      --glass: rgba(255,255,255,0.85);
+      --shadow: 0 6px 18px rgba(12, 40, 80, .08);
+      --radius: 12px;
+    }
 
-  .header-actions{ margin-left:auto; display:flex; gap:10px; align-items:center; }
-  .circle{
-    width:36px;height:36px;border-radius:999px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;color:#fff;
-  }
-  .notif-dot{ width:8px;height:8px;background:#ff7b7b;border-radius:50%; position:relative; left:10px; top:-12px; }
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+    body{background:linear-gradient(180deg,#e6f0fb 0%, #f8fafc 100%); color:#0f172a; display:flex; align-items:flex-start; justify-content:center; padding:18px;}
 
-  /* main content area */
-  main{
-    flex:1;
-    background: linear-gradient(180deg,#eef5fb 0%, #ffffff 7%);
-    border-top-left-radius:18px;
-    border-top-right-radius:18px;
-    padding:18px;
-    overflow:auto;
-    -webkit-overflow-scrolling:touch;
-  }
+    .app { width: 100%; max-width: 720px; }
 
-  /* page title */
-  .page-title{ font-size:28px; margin:8px 0 6px 2px; color:#12202a; font-weight:800; }
-  .page-sub{ color:var(--muted); margin:0 0 12px 2px; font-size:14px; }
+    /* Header */
+    header {
+      background: linear-gradient(90deg,var(--brand), #0b6ea8);
+      color: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      box-shadow: var(--shadow);
+    }
+    .brand { display:flex; align-items:center; gap:12px; cursor:pointer; }
+    .brand svg { width:46px;height:46px; }
+    .brand h1 { margin:0; font-size:18px; letter-spacing: .6px; }
+    .brand p { margin:0; font-size:11px; opacity:.9; }
 
-  /* map card */
-  .map-card{
-    height:320px;
-    border-radius:14px;
-    background: linear-gradient(135deg,#aee9ff 0%, #9bd7f2 35%, #8ad6f9 60%, #7bd1f3 100%);
-    box-shadow: var(--soft-shadow);
-    border:1px solid rgba(6,20,40,0.03);
-    position:relative;
-    overflow:hidden;
-  }
-  .map-pill{
-    position:absolute; left:20px; top:18px; background:var(--card); padding:8px 14px; border-radius:20px; box-shadow: 0 6px 18px rgba(2,26,40,0.06); font-weight:700; color:#13455b;
-  }
-  .map-pin{
-    position:absolute; width:42px; height:42px; border-radius:999px; background:#fff; display:flex;align-items:center;justify-content:center;
-    box-shadow: 0 6px 18px rgba(10,30,60,0.12);
-  }
-  .map-pin.ico1{ left:34%; top:28%; }
-  .map-pin.ico2{ left:22%; top:18%; }
-  .map-pin.ico3{ left:68%; top:58%; }
+    .header-actions { display:flex; gap:8px; align-items:center; }
+    .icon-btn { background: rgba(255,255,255,0.06); border: none; color:#fff; padding:8px; border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
+    .lang-badge { background: rgba(255,255,255,0.06); padding:6px 10px; border-radius:10px; font-size:13px; cursor:pointer; color:#fff; }
 
-  /* report button big red */
-  .report-btn{
-    margin-top:16px;
-    background: linear-gradient(90deg,#df3a34,#e95a4f);
-    color:#fff;
-    border:none;
-    width:100%;
-    padding:16px;
-    border-radius:14px;
-    font-weight:800;
-    font-size:18px;
-    box-shadow: 0 12px 30px rgba(217,59,52,0.14);
-    display:flex; gap:12px; align-items:center; justify-content:center;
-  }
+    /* Main content */
+    main { margin-top:14px; background:transparent; min-height:60vh; }
 
-  .floating-chat{
-    position:fixed;
-    right:28px;
-    bottom:106px; /* sits above bottom nav inside the phone */
-    width:62px;height:62px;border-radius:999px;background:#2f7dff;display:flex;align-items:center;justify-content:center;color:#fff;
-    box-shadow: 0 14px 38px rgba(47,125,255,0.18);
-    z-index:50;
-  }
+    .container { background:var(--glass); border-radius:12px; padding:16px; box-shadow: var(--shadow); }
 
-  /* bottom nav (inside the phone) */
-  .bottom-nav{
-    height:84px;
-    background: linear-gradient(180deg, #ffffff, #f6f8fb);
-    border-top: 1px solid rgba(6,20,40,0.03);
-    display:flex; align-items:center; justify-content:space-around; gap:6px;
-    padding:10px 8px; box-shadow: 0 -8px 24px rgba(9,20,35,0.04);
-  }
-  .nav-item{
-    text-align:center; font-size:12px; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:6px;
-    flex:1; max-width:84px;
-  }
-  .nav-item.active{ color:#2b7fff; }
-  .nav-icon{
-    width:48px;height:48px;border-radius:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#f6fbff,#eef6ff);
-    box-shadow: 0 6px 16px rgba(12,30,64,0.04);
-  }
-  .nav-icon.active{ background:linear-gradient(180deg,#e8f4ff,#dff0ff); box-shadow: 0 10px 30px rgba(45,110,255,0.08); }
+    /* Map card */
+    .map-card { position:relative; height:360px; border-radius:10px; overflow:hidden; border:1px solid rgba(2,6,23,0.06); background:
+      radial-gradient(ellipse at 15% 25%, rgba(6,182,212,0.12), transparent 8%),
+      linear-gradient(180deg,#cfeefc 0%, #a7def4 60%, #7fd1e7 100%);
+      }
+    .map-title { position:absolute; left:12px; top:12px; background:rgba(255,255,255,0.9); padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; color:var(--brand); box-shadow:0 4px 12px rgba(12,40,80,0.06); }
+    .grid { position:absolute; inset:0; display:grid; grid-template-columns:repeat(10,1fr); grid-template-rows:repeat(8,1fr); gap:0; pointer-events:none; opacity:.08; }
+    .grid div { border-right:1px solid rgba(0,0,0,.03); border-bottom:1px solid rgba(0,0,0,.03); }
 
-  /* cards for report page */
-  .grid-2{
-    display:grid;
-    grid-template-columns: repeat(3,1fr);
-    gap:12px;
-    margin-top:12px;
-  }
-  .type-card{
-    background:#fff; border-radius:12px; padding:14px; box-shadow: var(--soft-shadow); text-align:center; border:1px solid rgba(6,20,40,0.03);
-    display:flex; flex-direction:column; gap:8px; align-items:center;
-  }
-  .type-card .icon{ width:48px;height:48px;border-radius:12px; background:linear-gradient(180deg,#fff,#f8fbff); display:flex;align-items:center;justify-content:center; box-shadow: 0 6px 18px rgba(6,20,40,0.06); }
+    /* pins */
+    .pin { position:absolute; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center; }
+    .pin .dot { width:42px;height:42px;border-radius:50%; display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700; box-shadow:0 8px 18px rgba(2,6,23,.12); border:4px solid white; }
+    .pin .label { margin-top:6px; background:rgba(2,6,23,.88); color:#fff; padding:6px 8px; border-radius:8px; font-size:11px; white-space:nowrap; opacity:0; transition:opacity .18s; pointer-events:none; }
+    .pin:hover .label { opacity:1; }
 
-  /* intel feed list */
-  .feed-list{ margin-top:12px; display:flex; flex-direction:column; gap:12px; }
-  .feed-item{ background:#fff; border-radius:12px; padding:12px; display:flex; gap:12px; align-items:center; box-shadow: var(--soft-shadow); border-left:6px solid #2b9fff; }
-  .feed-item .meta{ flex:1; }
-  .tag{ background:#e6fff3; color:#0c8b55; padding:6px 10px; border-radius:12px; font-weight:700; font-size:12px; }
+    /* Quick action button */
+    .primary-cta { width:100%; background:var(--danger); color:white; font-weight:800; padding:12px; border-radius:12px; border:none; margin-top:12px; cursor:pointer; box-shadow: 0 8px 24px rgba(239,68,68,0.14); font-size:16px; }
 
-  /* contacts list */
-  .contact-card{ background:#fff; border-radius:12px; padding:12px; display:flex; gap:12px; align-items:center; justify-content:space-between; box-shadow: var(--soft-shadow); border:1px solid rgba(6,20,40,0.03); }
-  .contact-left{ display:flex; gap:12px; align-items:center; }
-  .contact-ico{ width:52px;height:52px;border-radius:12px;background:linear-gradient(180deg,#fff,#f8fbff); display:flex;align-items:center;justify-content:center; box-shadow: 0 6px 18px rgba(6,20,40,0.06); }
-  .call-btn{ background:linear-gradient(180deg,#f6f8fa,#fff); padding:10px 14px; border-radius:20px; font-weight:800; color:#1b2b3a; box-shadow: 0 6px 18px rgba(6,20,40,0.04); border:1px solid rgba(6,20,40,0.02); }
+    /* forecast cards */
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+    .card { background:var(--card); padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(12,40,80,.04); display:flex; gap:12px; align-items:center; border-left:6px solid #ffd54d; }
+    .card.tide { border-left-color: #06b6d4; }
 
-  /* small helpers */
-  h2.section-title{ margin:12px 0 8px; font-size:16px; color:#16262f; font-weight:800; }
-  p.small-muted{ color:var(--muted); margin:0; font-size:13px; }
+    /* feed / alerts */
+    .feed { margin-top:12px; display:flex; flex-direction:column; gap:10px; }
+    .alert { background:var(--card); padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(12,40,80,.04); display:flex; justify-content:space-between; align-items:flex-start; gap:12px; border-left:6px solid #0ea5a0; }
+    .alert .left { display:flex; gap:10px; align-items:center; }
+    .badge { font-size:11px; padding:6px 8px; border-radius:999px; background:#f0fdf4; color:var(--success); font-weight:700; }
 
-  /* responsive tweaks */
-  @media (max-width:420px){
-    .device{ width:360px; height:820px; }
-    .map-card{ height:280px; }
-  }
-</style>
+    /* bottom nav */
+    nav.bottom-nav { position:fixed; bottom:18px; left:0; right:0; max-width:720px; margin:0 auto; display:flex; justify-content:space-around; gap:8px; padding:8px; }
+    nav .nav-btn { background:var(--card); padding:8px 10px; border-radius:12px; box-shadow:var(--shadow); border:1px solid rgba(2,6,23,.04); display:flex; gap:8px; align-items:center; cursor:pointer; font-size:13px; }
+    nav .nav-btn.active { background:linear-gradient(90deg,#e6f0fb, #fff); border-color:rgba(2,6,23,.06); }
+
+    /* report form */
+    .report-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; }
+    .report-grid button { background:var(--card); padding:10px; border-radius:10px; border:1px solid rgba(2,6,23,.04); cursor:pointer; text-align:center; }
+    textarea { width:100%; min-height:90px; padding:10px; border-radius:8px; border:1px solid rgba(2,6,23,.06); font-size:14px; resize:vertical; }
+
+    /* contacts */
+    .contact-grid { display:grid; gap:12px; margin-top:12px; }
+    .contact { display:flex; justify-content:space-between; align-items:center; background:var(--card); padding:14px; border-radius:10px; box-shadow:var(--shadow); border-left:6px solid #0f4fa3; }
+
+    /* responsive */
+    @media (max-width:520px){
+      .map-card{height:300px;}
+      nav.bottom-nav{ padding:10px; left:12px; right:12px; max-width:calc(100% - 24px); }
+    }
+
+    /* small util */
+    .muted{ color:var(--muted); font-size:13px; }
+    .small{ font-size:13px; }
+    .hidden { display:none; }
+  </style>
 </head>
 <body>
-  <div class="device" role="application" aria-label="Bluewatch demo">
+  <div class="app">
+
     <!-- HEADER -->
-    <header class="appbar">
-      <div class="brand" style="flex:0 0 auto">
-        <div class="logo-badge" aria-hidden="true">BW</div>
-        <div style="line-height:1">
+    <header>
+      <div class="brand" onclick="navigate('dashboard')">
+        <!-- simple shield icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:46px;height:46px;">
+          <path d="M12 2l7 3v5c0 6-5 11-7 12-2-1-7-6-7-12V5l7-3z" fill="#0ea5a9" />
+          <path d="M12 8v4" stroke="#fff" stroke-linecap="round"/>
+          <circle cx="12" cy="16" r="1" fill="#fff" />
+        </svg>
+        <div>
           <h1>BLUEWATCH</h1>
-          <p>INDIA'S COASTAL SHIELD</p>
+          <p>India's Coastal Safety & Intelligence</p>
         </div>
       </div>
 
-      <div class="header-actions" role="toolbar" aria-label="header actions">
-        <div class="circle" title="language">
-          <!-- globe svg -->
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2v20M2 12h20" stroke="white" stroke-opacity="0.9" stroke-width="1.6" stroke-linecap="round"/></svg>
-        </div>
-        <div class="circle" title="notifications" style="position:relative">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v1M7.5 9.5c0-2.6 2.2-4.5 4.5-4.5s4.5 1.9 4.5 4.5v3.5L18 15v1H6v-1l.5-1.999V9.5z" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span class="notif-dot" aria-hidden="true"></span>
-        </div>
-        <div class="circle" title="profile">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM3 20a9 9 0 0118 0" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
+      <div class="header-actions">
+        <div class="lang-badge" title="Language">EN</div>
+        <button class="icon-btn" title="Notifications" onclick="alert('No real notifications (static demo)')">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="1.6">
+            <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118.6 14.6V11a6 6 0 10-12 0v3.6c0 .538-.214 1.055-.595 1.495L4 17h5" />
+          </svg>
+        </button>
+        <button class="icon-btn" title="Profile" onclick="alert('Profile not configured in this static demo')">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="1.6">
+            <path d="M20 21v-2a4 4 0 00-3-3.87" />
+            <path d="M4 21v-2a4 4 0 013-3.87" />
+            <path d="M12 7a4 4 0 100-8 4 4 0 000 8z" />
+          </svg>
+        </button>
       </div>
     </header>
 
     <!-- MAIN -->
-    <main id="mainContent" role="main">
-      <!-- Map Screen (default) -->
-      <section id="screen-map" class="screen" style="display:block;">
-        <h2 class="page-title">Map & Intel Feed</h2>
-        <p class="page-sub">Real-time alerts and maritime intelligence.</p>
+    <main>
+      <section id="screen-dashboard" class="container">
+        <h2 style="margin:0 0 8px 0;">Live Monitor & Intelligence</h2>
+        <p class="muted" style="margin:0 0 12px 0;">Real-time hazards and coastal information (static demo).</p>
 
-        <div class="map-card" role="region" aria-label="Live map">
-          <div class="map-pill">Live Monitor: Indian Coastline</div>
+        <!-- MAP CARD -->
+        <div class="map-card" aria-hidden="true">
+          <div class="map-title">Live Monitor: Indian Coastline</div>
+          <div class="grid" aria-hidden="true">
+            <!-- 10x8 grid squares -->
+            <!-- squares created via CSS; no content needed -->
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+          </div>
 
-          <!-- pins -->
-          <div class="map-pin ico1" title="jellyfish">
-            <!-- jelly icon -->
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 0018 0v-2a9 9 0 00-18 0z" fill="#8b37d6"/><path d="M6 18v2M9 18v2M15 18v2M18 18v2" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <!-- Pins (positioned in percent left/top inline style) -->
+          <!-- pin: Rip Current (red) -->
+          <div class="pin" style="left:30%; top:40%;">
+            <div class="dot" style="background:#ef4444;">RC</div>
+            <div class="label">Calangute Beach, Goa</div>
           </div>
-          <div class="map-pin ico2" title="rip">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 8c3 0 3-4 6-4s3 4 6 4 3-4 6-4" stroke="#e85a3a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+          <!-- pin: High Swell -->
+          <div class="pin" style="left:70%; top:60%;">
+            <div class="dot" style="background:#f97316;">SW</div>
+            <div class="label">Marina Beach, Chennai</div>
           </div>
-          <div class="map-pin ico3" title="swell">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 13c4-3 6 3 10 0s6 3 10 0" stroke="#ffb36b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+          <!-- pin: Jellyfish -->
+          <div class="pin" style="left:20%; top:25%;">
+            <div class="dot" style="background:#a78bfa;">JF</div>
+            <div class="label">Juhu Beach, Mumbai</div>
           </div>
         </div>
 
-        <button class="report-btn" aria-label="Report hazard" onclick="showScreen('report')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="margin-right:6px"><path d="M10 14l2-2 2 2M12 6v8" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Report Hazard
-        </button>
+        <button class="primary-cta" onclick="navigate('report')">⚠️ Report a Hazard</button>
 
-        <h2 class="section-title">Recent Alerts</h2>
-        <div class="feed-list" aria-live="polite">
-          <div class="feed-item">
-            <div style="width:44px; text-align:center;">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 12c3-3 6 3 9 0s6 3 9 0" stroke="#ff6b6b" stroke-width="1.6" stroke-linecap="round"/></svg>
-            </div>
-            <div class="meta">
-              <div style="font-weight:800; color:#12202a">Rip Current Spotted</div>
-              <div style="color:var(--muted); font-size:13px">Calangute Beach, Goa — 10 mins ago</div>
-            </div>
-            <div style="display:flex; flex-direction:column; align-items:flex-end;">
-              <div class="tag">Verified</div>
+        <div class="grid-2">
+          <div class="card">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.6"><path d="M12 2v6" /><circle cx="12" cy="15" r="4"/></svg>
+            <div>
+              <div style="font-weight:700">Weather</div>
+              <div class="muted">Mostly Sunny · 28°C</div>
             </div>
           </div>
 
-          <div class="feed-item" style="border-left-color:#2b9fff">
-            <div style="width:44px; text-align:center;">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 12c3-3 6 3 9 0s6 3 9 0" stroke="#ffb36b" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <div class="card tide">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="1.6"><path d="M2 15s2-2 4-2 4 2 6 2 4-2 6-2 4 2 4 2" /></svg>
+            <div>
+              <div style="font-weight:700">Tide</div>
+              <div class="muted">High Tide @ 15:30</div>
             </div>
-            <div class="meta">
-              <div style="font-weight:800; color:#12202a">High Swell/Waves Spotted</div>
-              <div style="color:var(--muted); font-size:13px">Marina Beach, Chennai — 25 mins ago</div>
+          </div>
+        </div>
+
+        <div class="feed" aria-live="polite" style="margin-top:14px;">
+          <div class="alert">
+            <div class="left">
+              <div style="width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff;">🌊</div>
+              <div>
+                <div style="font-weight:800">Rip Current Spotted</div>
+                <div class="muted">Calangute Beach, Goa</div>
+              </div>
             </div>
-            <div style="display:flex; flex-direction:column; align-items:flex-end;">
-              <div class="tag" style="background:#fff8e6; color:#a86f00">Unverified</div>
+            <div>
+              <div class="badge">Verified</div>
+              <div class="muted" style="text-align:right;margin-top:10px;font-size:12px;">10 mins ago</div>
+            </div>
+          </div>
+
+          <div class="alert">
+            <div class="left">
+              <div style="width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff;">🌊</div>
+              <div>
+                <div style="font-weight:800">High Swell</div>
+                <div class="muted">Marina Beach, Chennai</div>
+              </div>
+            </div>
+            <div>
+              <div class="badge" style="background:#fef3c7;color:#d97706;">Unverified</div>
+              <div class="muted" style="text-align:right;margin-top:10px;font-size:12px;">25 mins ago</div>
             </div>
           </div>
         </div>
       </section>
 
       <!-- REPORT SCREEN -->
-      <section id="screen-report" class="screen" style="display:none;">
-        <h2 class="page-title">Report Hazard</h2>
-        <p class="page-sub">Help save lives. Tap your location to report.</p>
+      <section id="screen-report" class="container hidden">
+        <h2 style="margin:0 0 8px 0;">Report Hazard</h2>
+        <p class="muted" style="margin:0 0 12px 0;">Help save lives — provide details and evidence if possible.</p>
 
-        <h3 style="margin:6px 0 8px; font-size:13px; color:#1b4aa0; font-weight:800;">1. SELECT HAZARD TYPE</h3>
-        <div class="grid-2">
-          <div class="type-card" onclick="selectType(this)">
-            <div class="icon"> <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 8c3 0 3-4 6-4s3 4 6 4 3-4 6-4" stroke="#ff6b6b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div style="font-weight:700">Rip Current</div>
-          </div>
-          <div class="type-card" onclick="selectType(this)">
-            <div class="icon"> <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M9 7h6M12 18v-8" stroke="#9b5bd6" stroke-width="1.6" stroke-linecap="round"/></svg></div>
-            <div style="font-weight:700">Jellyfish Swarm</div>
-          </div>
-          <div class="type-card" onclick="selectType(this)">
-            <div class="icon"> <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 18a7 7 0 0116 0" stroke="#ffb36b" stroke-width="1.6" stroke-linecap="round"/></svg></div>
-            <div style="font-weight:700">High Swell / Waves</div>
-          </div>
-
-          <div class="type-card" onclick="selectType(this)">
-            <div class="icon"> <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 3c2 2 4 2 6 0M12 21c-2-2-4-2-6 0" stroke="#97a0a8" stroke-width="1.6" stroke-linecap="round"/></svg></div>
-            <div style="font-weight:700">Debris / Oil Spill</div>
-          </div>
-          <div class="type-card" onclick="selectType(this)">
-            <div class="icon"> <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 2v8M5 12h14" stroke="#3e8cff" stroke-width="1.6" stroke-linecap="round"/></svg></div>
-            <div style="font-weight:700">Missing Boat / Distress</div>
-          </div>
+        <h4 style="margin:8px 0 6px 0;font-size:13px;color:var(--brand);">1. Select hazard type</h4>
+        <div class="report-grid">
+          <button onclick="selectHazard(this,'rip_current')">Rip Current</button>
+          <button onclick="selectHazard(this,'jellyfish')">Jellyfish Swarm</button>
+          <button onclick="selectHazard(this,'high_swell')">High Swell</button>
+          <button onclick="selectHazard(this,'debris')">Debris / Oil</button>
+          <button onclick="selectHazard(this,'missing_boat')">Missing Boat</button>
         </div>
 
-        <h3 style="margin:16px 0 8px; font-size:13px; color:#1b4aa0; font-weight:800;">2. PROVIDE DETAILS</h3>
-        <div style="background:#fff; border-radius:12px; padding:12px; box-shadow: var(--soft-shadow); border:1px solid rgba(6,20,40,0.03);">
-          <div style="display:flex; gap:12px; align-items:center;">
-            <div style="flex:1;">
-              <div style="display:flex; gap:10px;">
-                <button style="flex:1;padding:12px;border-radius:10px;background:#fbfdff;border:1px solid rgba(6,20,40,0.03);">📸 Photo Evidence</button>
-                <button style="flex:1;padding:12px;border-radius:10px;background:#fbfdff;border:1px solid rgba(6,20,40,0.03);">✍️ Type Details</button>
-                <button style="flex:1;padding:12px;border-radius:10px;background:#fbfdff;border:1px solid rgba(6,20,40,0.03);">🔊 Record Audio</button>
-              </div>
-              <textarea id="desc" placeholder="Add extra details (optional)" style="width:100%; margin-top:10px; padding:10px; border-radius:8px; border:1px solid rgba(6,20,40,0.03); min-height:86px;"></textarea>
-            </div>
+        <div id="evidence-section" class="hidden" style="margin-top:10px;">
+          <h4 style="margin:8px 0 6px 0;font-size:13px;color:var(--brand);">2. Provide details / evidence</h4>
+
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <button onclick="chooseInput('photo')" style="flex:1;padding:10px;border-radius:10px;border:1px dashed rgba(2,6,23,.06);background:#fff;cursor:pointer;">📷 Add Photo</button>
+            <button onclick="chooseInput('audio')" style="flex:1;padding:10px;border-radius:10px;border:1px dashed rgba(2,6,23,.06);background:#fff;cursor:pointer;">🎙️ Record Audio</button>
           </div>
+
+          <textarea id="report-text" placeholder="Describe the hazard, location and time observed..."></textarea>
+
+          <button class="primary-cta" style="margin-top:10px;" onclick="submitReport()">Submit Report</button>
         </div>
 
-        <button class="report-btn" style="margin-top:12px;" onclick="submitReport()">Submit Report</button>
+        <button style="margin-top:12px;background:transparent;border:none;color:var(--muted);cursor:pointer;" onclick="navigate('dashboard')">← Back</button>
       </section>
 
-      <!-- INTEL FEED -->
-      <section id="screen-intel" class="screen" style="display:none;">
-        <h2 class="page-title">Intelligence Feed</h2>
-        <p class="page-sub">Latest verified hazards and safety information.</p>
+      <!-- FEED SCREEN -->
+      <section id="screen-feed" class="container hidden">
+        <h2 style="margin:0 0 8px 0;">Intelligence Feed</h2>
+        <p class="muted" style="margin:0 0 12px 0;">Latest verified hazards and safety updates.</p>
 
-        <div class="feed-list">
-          <div class="feed-item">
-            <div style="width:44px; text-align:center;">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 12c3-3 6 3 9 0s6 3 9 0" stroke="#ff6b6b" stroke-width="1.6"/></svg>
-            </div>
-            <div class="meta">
-              <div style="font-weight:800">Rip Current Spotted</div>
-              <div style="color:var(--muted); font-size:13px">Calangute Beach, Goa</div>
-            </div>
-            <div style="display:flex; flex-direction:column; align-items:flex-end;">
-              <div class="tag">Verified</div>
-              <div style="color:var(--muted); font-size:12px; margin-top:6px;">10 mins ago</div>
-            </div>
-          </div>
-
-          <div class="feed-item">
-            <div style="width:44px; text-align:center;">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 12c3-3 6 3 9 0s6 3 9 0" stroke="#ffb36b" stroke-width="1.6"/></svg>
-            </div>
-            <div class="meta">
-              <div style="font-weight:800">High Swell/Waves Spotted</div>
-              <div style="color:var(--muted); font-size:13px">Marina Beach, Chennai</div>
-            </div>
-            <div style="display:flex; flex-direction:column; align-items:flex-end;">
-              <div class="tag" style="background:#fff8e6; color:#a86f00">Unverified</div>
-              <div style="color:var(--muted); font-size:12px; margin-top:6px;">25 mins ago</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- CONTACTS -->
-      <section id="screen-contacts" class="screen" style="display:none;">
-        <h2 class="page-title">Contacts</h2>
-        <p class="page-sub">Immediate help and emergency services for India's coastline.</p>
-
-        <div style="margin-top:12px; display:flex; flex-direction:column; gap:12px;">
-          <div class="contact-card">
-            <div class="contact-left">
-              <div class="contact-ico">
-                <!-- police -->
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2l3 4h-6l3-4zM6 8v8a6 6 0 0012 0V8" stroke="#1b3f8a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
+        <div class="feed" style="margin-top:6px;">
+          <!-- feed items repeated -->
+          <div class="alert">
+            <div class="left">
+              <div style="width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff;">⚠️</div>
               <div>
-                <div style="font-weight:800; color:#12202a">Police</div>
-                <div style="color:var(--muted); font-size:13px">All Law and Order Emergencies (India)</div>
+                <div style="font-weight:800">Missing Boat — Distress</div>
+                <div class="muted">Near Amanzimtoti (mock)</div>
               </div>
             </div>
             <div>
-              <button class="call-btn" onclick="callNumber('100')">📞 100</button>
+              <div class="badge">Critical</div>
+              <div class="muted" style="text-align:right;margin-top:10px;font-size:12px;">1 hr ago</div>
             </div>
           </div>
 
-          <div class="contact-card">
-            <div class="contact-left">
-              <div class="contact-ico">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 8h12v10a2 2 0 01-2 2H8a2 2 0 01-2-2V8zM12 4v4" stroke="#0ea34a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
+          <div class="alert">
+            <div class="left">
+              <div style="width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff;">🪸</div>
               <div>
-                <div style="font-weight:800; color:#12202a">Ambulance / Hospital</div>
-                <div style="color:var(--muted); font-size:13px">Medical Emergencies & Transport (India)</div>
+                <div style="font-weight:800">Jellyfish Swarm</div>
+                <div class="muted">Juhu Beach, Mumbai</div>
               </div>
             </div>
             <div>
-              <button class="call-btn" onclick="callNumber('102')">📞 102</button>
-            </div>
-          </div>
-
-          <div class="contact-card">
-            <div class="contact-left">
-              <div class="contact-ico">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7v10a4 4 0 004 4h8a4 4 0 004-4V7" stroke="#0a9fb8" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <div>
-                <div style="font-weight:800; color:#12202a">Coastal Emergency (Coast Guard)</div>
-                <div style="color:var(--muted); font-size:13px">Indian Coast Guard - Search & Rescue</div>
-              </div>
-            </div>
-            <div>
-              <button class="call-btn" onclick="callNumber('1554')">📞 1554</button>
+              <div class="badge" style="background:#fef3c7;color:#d97706;">Unverified</div>
+              <div class="muted" style="text-align:right;margin-top:10px;font-size:12px;">2 hr ago</div>
             </div>
           </div>
         </div>
 
+        <button style="margin-top:12px;background:transparent;border:none;color:var(--muted);cursor:pointer;" onclick="navigate('dashboard')">← Back</button>
       </section>
+
+      <!-- CONTACTS SCREEN -->
+      <section id="screen-contact" class="container hidden">
+        <h2 style="margin:0 0 8px 0;">Emergency Contacts</h2>
+        <p class="muted" style="margin:0 0 12px 0;">Quick access numbers for India's coastal emergencies.</p>
+
+        <div class="contact-grid">
+          <div class="contact">
+            <div>
+              <div style="font-weight:800">Police</div>
+              <div class="muted">All law & order emergencies</div>
+            </div>
+            <a href="tel:100">100</a>
+          </div>
+
+          <div class="contact">
+            <div>
+              <div style="font-weight:800">Ambulance / Hospital</div>
+              <div class="muted">Medical emergencies & patient transport</div>
+            </div>
+            <a href="tel:102">102</a>
+          </div>
+
+          <div class="contact">
+            <div>
+              <div style="font-weight:800">Indian Coast Guard</div>
+              <div class="muted">Search & Rescue</div>
+            </div>
+            <a href="tel:1554">1554</a>
+          </div>
+
+          <div class="contact">
+            <div>
+              <div style="font-weight:800">Fire & Rescue</div>
+              <div class="muted">Fire emergencies</div>
+            </div>
+            <a href="tel:101">101</a>
+          </div>
+        </div>
+
+        <button style="margin-top:12px;background:transparent;border:none;color:var(--muted);cursor:pointer;" onclick="navigate('dashboard')">← Back</button>
+      </section>
+
     </main>
 
-    <!-- floating chat (inside phone bounds) -->
-    <div class="floating-chat" onclick="alert('Chat / help (demo)')">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H8l-5 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
+    <!-- BOTTOM NAV (desktop-safe) -->
+    <nav class="bottom-nav" aria-hidden="false">
+      <div class="nav-btn active" onclick="navigate('dashboard')" id="nav-dashboard">
+        <svg width="18" height="18" viewBox="0 0 24 24" style="opacity:.9;margin-right:6px;"><path d="M3 13h8V3H3v10zM3 21h8v-6H3v6zM13 21h8V11h-8v10zM13 3v6h8V3h-8z" fill="#0f172a" /></svg>
+        Dashboard
+      </div>
 
-    <!-- bottom navigation -->
-    <nav class="bottom-nav" role="navigation" aria-label="Bottom navigation">
-      <button class="nav-item" id="nav-map" onclick="activateNav('map')" aria-label="Map">
-        <div class="nav-icon" id="ico-map">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2V6z" stroke="#2b7fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <div>Map</div>
-      </button>
+      <div class="nav-btn" onclick="navigate('report')" id="nav-report">
+        <svg width="18" height="18" viewBox="0 0 24 24" style="opacity:.9;margin-right:6px;"><path d="M12 2l7 3v7c0 6-5 11-7 12-2-1-7-6-7-12V5l7-3z" fill="#ef4444" /></svg>
+        Report
+      </div>
 
-      <button class="nav-item" id="nav-report" onclick="activateNav('report')" aria-label="Report">
-        <div class="nav-icon" id="ico-report">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2v8M4 14h16" stroke="#6e7a86" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <div>Report</div>
-      </button>
+      <div class="nav-btn" onclick="navigate('feed')" id="nav-feed">
+        <svg width="18" height="18" viewBox="0 0 24 24" style="opacity:.9;margin-right:6px;"><path d="M3 6h18M3 12h18M3 18h18" stroke="#0f172a" stroke-width="1.6" fill="none"/></svg>
+        Feed
+      </div>
 
-      <button class="nav-item" id="nav-intel" onclick="activateNav('intel')" aria-label="Intel Feed">
-        <div class="nav-icon" id="ico-intel">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 7h12M6 12h12M6 17h12" stroke="#6e7a86" stroke-width="1.4" stroke-linecap="round"/></svg>
-        </div>
-        <div>Intel Feed</div>
-      </button>
-
-      <button class="nav-item" id="nav-contacts" onclick="activateNav('contacts')" aria-label="Contacts">
-        <div class="nav-icon" id="ico-contacts">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M16 11a4 4 0 01-8 0M12 5a4 4 0 110 8" stroke="#6e7a86" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <div>Contacts</div>
-      </button>
+      <div class="nav-btn" onclick="navigate('contact')" id="nav-contact">
+        <svg width="18" height="18" viewBox="0 0 24 24" style="opacity:.9;margin-right:6px;"><path d="M21 8V7a2 2 0 00-2-2h-3" fill="#0f172a" /></svg>
+        Contacts
+      </div>
     </nav>
+
   </div>
 
-<script>
-  // tab switching logic
-  function activateNav(tab){
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.querySelectorAll('.nav-icon').forEach(i => i.classList.remove('active'));
+  <!-- Minimal JS to switch views and handle basic report actions -->
+  <script>
+    (function(){
+      // Simple view navigation
+      function show(id) {
+        var screens = ['screen-dashboard','screen-report','screen-feed','screen-contact'];
+        screens.forEach(function(s){ document.getElementById(s).classList.add('hidden'); });
+        document.getElementById(id).classList.remove('hidden');
 
-    document.getElementById('nav-' + tab).classList.add('active');
-    document.querySelector('#nav-' + tab + ' .nav-icon').classList.add('active');
+        // nav active state
+        var navMap = { 'screen-dashboard':'nav-dashboard', 'screen-report':'nav-report', 'screen-feed':'nav-feed', 'screen-contact':'nav-contact' };
+        Object.values(navMap).forEach(function(n){ document.getElementById(n).classList.remove('active'); });
+        var navId = navMap[id];
+        if (navId) document.getElementById(navId).classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
 
-    // hide all screens
-    document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+      window.navigate = function(page) {
+        switch(page) {
+          case 'dashboard': show('screen-dashboard'); break;
+          case 'report': show('screen-report'); break;
+          case 'feed': show('screen-feed'); break;
+          case 'contact': show('screen-contact'); break;
+          default: show('screen-dashboard');
+        }
+      };
 
-    if(tab === 'map') { document.getElementById('screen-map').style.display = 'block'; }
-    if(tab === 'report') { document.getElementById('screen-report').style.display = 'block'; }
-    if(tab === 'intel') { document.getElementById('screen-intel').style.display = 'block'; }
-    if(tab === 'contacts') { document.getElementById('screen-contacts').style.display = 'block'; }
-  }
+      // Report selection flow
+      window.selectHazard = function(btn, type) {
+        // mark selected visually
+        Array.from(btn.parentElement.children).forEach(function(b){ b.style.boxShadow='none'; b.style.borderColor='rgba(2,6,23,.04)'; });
+        btn.style.boxShadow = '0 8px 20px rgba(2,6,23,.08)';
+        btn.style.borderColor = '#0f4fa3';
+        document.getElementById('evidence-section').classList.remove('hidden');
+        // store selection
+        window._selectedHazard = type;
+      };
 
-  // initial active
-  activateNav('map');
+      window.chooseInput = function(mode) {
+        alert('This static demo cannot attach real photos/audio. Use the text box to describe the hazard.');
+      };
 
-  // show report screen directly
-  function showScreen(name){
-    activateNav('report');
-    // scroll to top of main content
-    document.querySelector('main').scrollTop = 0;
-  }
+      window.submitReport = function() {
+        var text = document.getElementById('report-text').value.trim();
+        if (!window._selectedHazard) { alert('Please select a hazard type.'); return; }
+        if (!text) {
+          if (!confirm('You are submitting a report without details. Continue?')) return;
+        }
+        // Mock adding to feed: we simply alert and go to feed screen
+        alert('Report submitted (mock). Thank you — returning to dashboard.');
+        // Optionally, you could append to the #screen-feed area; for demo we navigate back.
+        navigate('dashboard');
+      };
 
-  // choose hazard type highlight
-  function selectType(el){
-    document.querySelectorAll('.type-card').forEach(c => c.style.border = '1px solid rgba(6,20,40,0.03)');
-    el.style.border = '2px solid rgba(217,59,52,0.18)';
-    el.style.boxShadow = '0 18px 38px rgba(217,59,52,0.08)';
-  }
-
-  // fake submit
-  function submitReport(){
-    alert('Report submitted (demo). Sent to Govt, Coastal Guards, Hospitals, NDMA & SDMA.');
-    activateNav('map');
-  }
-
-  function callNumber(n){
-    alert('Calling ' + n + ' (demo)');
-    // In a real app: window.location.href = 'tel:' + n;
-  }
-
-  // accessibility: keyboard navigation for tabs
-  document.addEventListener('keydown', (e) => {
-    if(e.key === '1') activateNav('map');
-    if(e.key === '2') activateNav('report');
-    if(e.key === '3') activateNav('intel');
-    if(e.key === '4') activateNav('contacts');
-  });
-</script>
+      // start on dashboard
+      navigate('dashboard');
+    })();
+  </script>
 </body>
 </html>
